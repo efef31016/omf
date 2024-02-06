@@ -194,11 +194,13 @@ def prism(prismDRDict):
 		prismDRDict['dayCount']= 365 - dayCount.days + 1
 		prismDRDict['stopIndex'] = (stopIndex.days * 24) + 23
 		prismDRDict['numMonths'] = (12 - prismDRDict['startMonth'] + 1) + prismDRDict['startMonth']
-	# 若非 24 小時的費率結構 (計算在某個週期內開啟與關閉的總小時數)
+	
+	# ------- 依不同費率結構調整數據 ------- #
+	# 非24小時，計算在某個週期內開啟與關閉的總小時數
 	if prismDRDict['rateStructure'] != '24hourly':
 		prismDRDict['numHoursOn'] = prismDRDict['stopHour'] - prismDRDict['startHour'] + 1
 		prismDRDict['numHoursOff'] = (24 - prismDRDict['numHoursOn'])
-	
+	# '2tierCPP' 或 'PTR'，尖峰時段開啟和關閉的小時數是基於特定天數（numCPPDays）的計算
 	if prismDRDict['rateStructure'] == '2tierCPP'  or prismDRDict['rateStructure'] == 'PTR':
 		prismDRDict['hrsOnPeakWCPP'] = prismDRDict['numHoursOn'] * prismDRDict['numCPPDays']
 		prismDRDict['hrsOffPeakWCPP'] = prismDRDict['numHoursOff'] * prismDRDict['numCPPDays']
@@ -206,6 +208,7 @@ def prism(prismDRDict):
 		prismDRDict['hrsOffPeakWOCPP'] = ((prismDRDict['dayCount'] * 24) - prismDRDict['hrsOnPeakWOCPP']) - prismDRDict['hrsOffPeakWCPP']
 		prismDRDict['hrsOnPeakPerMonthWCPP'] = float(prismDRDict['hrsOnPeakWCPP']) / float(prismDRDict['numMonths'])
 		prismDRDict['hrsOffPeakPerMonthWCPP'] = float(prismDRDict['hrsOffPeakWCPP']) / float(prismDRDict['numMonths'])
+	# '24hourly'，只有一小時是特定價格，因此設定 hrsOn 為總天數乘以1，hrsOff 為總天數乘以23
 	elif prismDRDict['rateStructure'] == '24hourly':
 		prismDRDict['hrsOn'] = 1 * prismDRDict['dayCount'] #Only one hour per day at a given price
 		prismDRDict['hrsOff'] = 23 * prismDRDict['dayCount']
