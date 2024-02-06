@@ -176,12 +176,15 @@ def work(modelDir, inputDict):
 def prism(prismDRDict):
 	''' Calculate demand changes based on Brattle's PRISM. '''
 	# Calculate times.
+	# 這行程式碼設定了起始日期為 2009 年的 prismDRDict['startMonth'] 月的第一天
 	startDate = datetime.date(2009,prismDRDict['startMonth'],1)
+	# 設定終止日期為 2009 年的 prismDRDict['stopMonth'] 月的最後一天
 	lastDay = calendar.monthrange(2009, prismDRDict['stopMonth'])
 	stopDate = datetime.date(2009,prismDRDict['stopMonth'],lastDay[1])
 	dayCount = stopDate - startDate
 	startIndex = startDate - datetime.date(2009,1,1)
 	stopIndex = stopDate  - datetime.date(2009,1,1)
+	# 將起始索引的天數轉換為小時
 	prismDRDict['startIndex'] = (startIndex.days * 24)
 	if (startDate <= stopDate):
 		prismDRDict['dayCount'] = dayCount.days + 1
@@ -191,9 +194,11 @@ def prism(prismDRDict):
 		prismDRDict['dayCount']= 365 - dayCount.days + 1
 		prismDRDict['stopIndex'] = (stopIndex.days * 24) + 23
 		prismDRDict['numMonths'] = (12 - prismDRDict['startMonth'] + 1) + prismDRDict['startMonth']
+	# 若非 24 小時的費率結構 (計算在某個週期內開啟與關閉的總小時數)
 	if prismDRDict['rateStructure'] != '24hourly':
 		prismDRDict['numHoursOn'] = prismDRDict['stopHour'] - prismDRDict['startHour'] + 1
 		prismDRDict['numHoursOff'] = (24 - prismDRDict['numHoursOn'])
+	
 	if prismDRDict['rateStructure'] == '2tierCPP'  or prismDRDict['rateStructure'] == 'PTR':
 		prismDRDict['hrsOnPeakWCPP'] = prismDRDict['numHoursOn'] * prismDRDict['numCPPDays']
 		prismDRDict['hrsOffPeakWCPP'] = prismDRDict['numHoursOff'] * prismDRDict['numCPPDays']
@@ -458,18 +463,18 @@ def _tests():
 	modelLoc = pJoin(__neoMetaModel__._omfDir,"data","Model","admin","Automated Testing of " + modelName)
 	# Blow away old test results if necessary.
 	try:
-		shutil.rmtree(modelLoc)
+		shutil.rmtree(modelLoc)  # 遞迴刪除目錄和文件
 	except:
 		# No previous test results.
 		pass
 	# Create New.
-	new(modelLoc)
+	new(modelLoc)  # 創建 pJoin(modelDir, "allInputData.json")，其中包含在 new() 中定義的資訊
 	# Pre-run.
-	__neoMetaModel__.renderAndShow(modelLoc)
+	__neoMetaModel__.renderAndShow(modelLoc)  # 在本機瀏覽器中渲染並開啟空白範本。
 	# Run the model.
-	__neoMetaModel__.runForeground(modelLoc)
+	__neoMetaModel__.runForeground(modelLoc)  # 立即在同一執行緒中執行所有模型工作。
 	# Show the output.
-	__neoMetaModel__.renderAndShow(modelLoc)
+	__neoMetaModel__.renderAndShow(modelLoc)  # 在本機瀏覽器中渲染並開啟帶輸出範本。
 
 if __name__ == '__main__':
 	_tests()
